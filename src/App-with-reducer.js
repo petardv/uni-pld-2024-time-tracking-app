@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useReducer } from "react";
 import "./App.css";
 // import "./client.js";
-import "./client-axios.js";
+import client from "./client-axios.js";
 import helpers from "./helpers.js";
 import timersReducer from "./timersReducer.js";
 
@@ -15,7 +15,7 @@ function TimersDashboard() {
   const [timers, dispatch] = useReducer(timersReducer, []);
 
   useEffect(() => {
-    // component is created/updated
+    // component is created
     console.log("Timer created");
     loadTimersFromServer();
     // setInterval(loadTimersFromServer, 5000);

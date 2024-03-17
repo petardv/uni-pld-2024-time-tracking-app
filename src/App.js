@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 import "./App.css";
 // import "./client.js";
-import "./client-axios.js";
+import client from "./client-axios.js";
 import helpers from "./helpers.js";
 
 /*
