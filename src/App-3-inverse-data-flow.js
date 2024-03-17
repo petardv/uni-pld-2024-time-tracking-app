@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./App.css";
-import "./helpers.js";
+import helpers from "./helpers.js";
 
 /*
   eslint-disable react/prefer-stateless-function, react/jsx-boolean-value,

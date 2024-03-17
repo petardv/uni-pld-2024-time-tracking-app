@@ -1,34 +1,42 @@
 import { useState } from "react";
 import { useEffect } from "react";
+import { useReducer } from "react";
 import "./App.css";
 // import "./client.js";
 import "./client-axios.js";
 import helpers from "./helpers.js";
+import timersReducer from "./timersReducer.js";
 
 /*
   eslint-disable react/prefer-stateless-function, react/jsx-boolean-value,
   no-undef, jsx-a11y/label-has-for, react/jsx-first-prop-new-line
 */
 function TimersDashboard() {
-  const [timers, setTimers] = useState([]);
+  const [timers, dispatch] = useReducer(timersReducer, []);
 
   useEffect(() => {
     // component is created/updated
+    console.log("Timer created");
     loadTimersFromServer();
-    const interval = setInterval(loadTimersFromServer, 5000);
+    // setInterval(loadTimersFromServer, 5000);
 
     return () => {
-      clearInterval(interval);
       console.log("Timer destroyed");
     };
   }, []);
 
   function loadTimersFromServer() {
-    client.getTimers((serverTimers) => setTimers(serverTimers));
+    client.getTimers((serverTimers) =>
+      dispatch({
+        type: "initialized",
+        timers: serverTimers,
+      })
+    );
   }
 
   function handleCreateFormSubmit(timer) {
     createTimer(timer);
+    //test
   }
 
   function handleEditFormSubmit(attrs) {
@@ -51,71 +59,48 @@ function TimersDashboard() {
   // ...
   function createTimer(timer) {
     const t = helpers.newTimer(timer);
-    setTimers(timers.concat(t));
+    dispatch({
+      type: "created",
+      timer: t,
+    });
 
     client.createTimer(t);
   }
 
   function updateTimer(attrs) {
-    setTimers(
-      timers.map((timer) => {
-        if (timer.id === attrs.id) {
-          return Object.assign({}, timer, {
-            title: attrs.title,
-            project: attrs.project,
-          });
-        } else {
-          return timer;
-        }
-      })
-    );
+    dispatch({
+      type: "updated",
+      timer: attrs,
+    });
 
     client.updateTimer(attrs);
   }
 
   function deleteTimer(timerId) {
-    setTimers(timers.filter((t) => t.id !== timerId));
+    dispatch({
+      type: "deleted",
+      timerId: timerId,
+    });
 
     client.deleteTimer({ id: timerId });
   }
 
   function startTimer(timerId) {
-    // ...
-    const now = Date.now();
+    dispatch({
+      type: "started",
+      timerId: timerId,
+    });
 
-    setTimers(
-      timers.map((timer) => {
-        if (timer.id === timerId) {
-          return Object.assign({}, timer, {
-            runningSince: now,
-          });
-        } else {
-          return timer;
-        }
-      })
-    );
-
-    client.startTimer({ id: timerId, start: now });
+    client.startTimer({ id: timerId, start: Date.now() });
   }
 
   function stopTimer(timerId) {
-    const now = Date.now();
+    dispatch({
+      type: "stopped",
+      timerId: timerId,
+    });
 
-    setTimers(
-      timers.map((timer) => {
-        if (timer.id === timerId) {
-          const lastElapsed = now - timer.runningSince;
-          return Object.assign({}, timer, {
-            elapsed: timer.elapsed + lastElapsed,
-            runningSince: null,
-          });
-        } else {
-          return timer;
-        }
-      })
-    );
-
-    client.stopTimer({ id: timerId, stop: now });
+    client.stopTimer({ id: timerId, stop: Date.now() });
   }
 
   return (
